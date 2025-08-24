@@ -13,6 +13,11 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "community_id", nullable = false)
     private Community community;
+    
+    // ADD THIS FIELD TO LINK THE EVENT TO ITS CREATOR
+    @ManyToOne
+    @JoinColumn(name = "organizer_id", nullable = false)
+    private User organizer;
 
     @Column(nullable = false, length = 150)
     private String title;
@@ -28,26 +33,28 @@ public class Event {
 
     public Event() {}
 
-    public Event(Long id, Community community, String title, String description,
-                 LocalDateTime eventDate, String location) {
-        this.id = id;
-        this.community = community;
-        this.title = title;
-        this.description = description;
-        this.eventDate = eventDate;
-        this.location = location;
-    }
-
+    // You can add a new constructor if needed, but a no-arg constructor is often sufficient
+    
+    // Getters and Setters for all fields
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    
     public Community getCommunity() { return community; }
     public void setCommunity(Community community) { this.community = community; }
+    
+    // ADD GETTERS AND SETTERS FOR ORGANIZER
+    public User getOrganizer() { return organizer; }
+    public void setOrganizer(User organizer) { this.organizer = organizer; }
+    
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+    
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+    
     public LocalDateTime getEventDate() { return eventDate; }
     public void setEventDate(LocalDateTime eventDate) { this.eventDate = eventDate; }
+    
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
 }

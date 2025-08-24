@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { communitiesAPI } from '../api/communities';
 import { useAuth } from '../context/AuthContext';
+import CreateCommunityForm from '../components/CreateCommunityForm.jsx';
 
 export default function Communities() {
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { user } = useAuth();
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     fetchCommunities();
@@ -19,25 +21,28 @@ export default function Communities() {
       setCommunities(data);
     } catch (err) {
       setError('Failed to fetch communities');
-      console.error('Error fetching communities:', err);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleCommunityCreated = () => {
+    setShowCreateForm(false);
+    fetchCommunities();
+  };
+
   const handleJoinCommunity = async (communityId) => {
     if (!user) {
-      alert('Please login to join communities');
+      alert('Please log in to join a community.');
       return;
     }
 
     try {
       await communitiesAPI.joinCommunity(communityId);
       alert('Successfully joined community!');
-      fetchCommunities(); // Refresh communities
+      fetchCommunities();
     } catch (err) {
-      alert('Failed to join community');
-      console.error('Error joining community:', err);
+      alert('Failed to join community.');
     }
   };
 
@@ -59,8 +64,17 @@ export default function Communities() {
 
   return (
     <div className="content-section">
-      <h1>Communities</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h1>Communities</h1>
+        {isAuthenticated && (
+          <button className="odoo-primary-btn" onClick={() => setShowCreateForm(!showCreateForm)}>
+            {showCreateForm ? 'Cancel' : 'Create Community'}
+          </button>
+        )}
+      </div>
       <p>Join communities and connect with like-minded people</p>
+      
+      {showCreateForm && <CreateCommunityForm onCommunityCreated={handleCommunityCreated} />}
       
       <div className="communities-grid">
         {communities.length === 0 ? (

@@ -8,6 +8,10 @@ public class Community {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @ManyToOne
+    @JoinColumn(name = "creator_id", nullable = false)
+    private User creator;
 
     @Column(nullable = false, unique = true, length = 255)
     private String name;
@@ -25,6 +29,9 @@ public class Community {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    
+    public User getCreator() { return creator; }
+    public void setCreator(User creator) { this.creator = creator; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

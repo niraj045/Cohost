@@ -2,16 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { eventsAPI } from '../api/events';
 import { rsvpAPI } from '../api/rsvp';
 import { useAuth } from '../context/AuthContext';
+import CreateEventForm from '../components/CreateEventForm';
 
 export default function Events() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { user } = useAuth();
-
-  useEffect(() => {
-    fetchEvents();
-  }, []);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const { user, isAuthenticated } = useAuth();
 
   const fetchEvents = async () => {
     try {
@@ -20,10 +18,18 @@ export default function Events() {
       setEvents(data);
     } catch (err) {
       setError('Failed to fetch events');
-      console.error('Error fetching events:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+  
+  const handleEventCreated = () => {
+    setShowCreateForm(false);
+    fetchEvents();
   };
 
   const handleRSVP = async (eventId) => {
@@ -31,14 +37,12 @@ export default function Events() {
       alert('Please login to RSVP');
       return;
     }
-
     try {
       await rsvpAPI.createRsvp(eventId, { status: 'ATTENDING' });
       alert('RSVP successful!');
-      fetchEvents(); // Refresh events
+      fetchEvents();
     } catch (err) {
       alert('Failed to RSVP');
-      console.error('Error creating RSVP:', err);
     }
   };
 
@@ -60,8 +64,17 @@ export default function Events() {
 
   return (
     <div className="content-section">
-      <h1>Events</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h1>Events</h1>
+        {isAuthenticated && (
+          <button className="odoo-primary-btn" onClick={() => setShowCreateForm(!showCreateForm)}>
+            {showCreateForm ? 'Cancel' : 'Create Event'}
+          </button>
+        )}
+      </div>
       <p>Discover amazing events in your community</p>
+
+      {showCreateForm && <CreateEventForm onEventCreated={handleEventCreated} />}
       
       <div className="events-grid">
         {events.length === 0 ? (
@@ -80,21 +93,15 @@ export default function Events() {
               
               <div className="event-body">
                 <p className="event-description">{event.description}</p>
-                
                 <div className="event-details">
                   <div className="event-location">
                     <span>📍 {event.location}</span>
                   </div>
-                  
                   {event.community && (
                     <div className="event-community">
                       <span>🏢 {event.community.name}</span>
                     </div>
                   )}
-                  
-                  <div className="event-capacity">
-                    <span>👥 Max Capacity: {event.maxCapacity}</span>
-                  </div>
                 </div>
               </div>
               
