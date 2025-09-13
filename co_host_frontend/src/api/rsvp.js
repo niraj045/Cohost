@@ -24,5 +24,10 @@ export const rsvpAPI = {
   getUserRsvps: async (userId) => {
     const response = await api.get(`/users/${userId}/rsvp`);
     return response.data;
+  },
+
+  getUserEventRsvp: async (eventId) => {
+    const response = await api.get(`/events/${eventId}/rsvp/my`);
+    return response.data;
   }
 };

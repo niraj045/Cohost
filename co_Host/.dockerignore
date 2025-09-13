@@ -1,0 +1,14 @@
+.git/
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+*.md
+.env
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+src/
+pom.xml
+target/*.jar.original
+target/classes/
+target/maven-*/

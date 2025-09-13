@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  database:
+    image: mysql:8.0
+    container_name: cohost-db-dev
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: cohost_db
+      MYSQL_USER: cohost_user
+      MYSQL_PASSWORD: cohost_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data_dev:/var/lib/mysql
+    networks:
+      - cohost-network-dev
+
+  # Backend Service (for development, you can run this locally instead)
+  backend:
+    build:
+      context: ./co_Host
+      dockerfile: Dockerfile
+    container_name: cohost-backend-dev
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/cohost_db
+      SPRING_DATASOURCE_USERNAME: cohost_user
+      SPRING_DATASOURCE_PASSWORD: cohost_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: true
+      SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    networks:
+      - cohost-network-dev
+    volumes:
+      - ./co_Host/src:/app/src
+    restart: unless-stopped
+
+volumes:
+  mysql_data_dev:
+    driver: local
+
+networks:
+  cohost-network-dev:
+    driver: bridge

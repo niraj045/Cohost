@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  database:
+    image: mysql:8.0
+    container_name: cohost-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: cohost_db
+      MYSQL_USER: cohost_user
+      MYSQL_PASSWORD: cohost_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - cohost-network
+    restart: unless-stopped
+
+  # Backend Service
+  backend:
+    build:
+      context: ./co_Host
+      dockerfile: Dockerfile
+    container_name: cohost-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/cohost_db
+      SPRING_DATASOURCE_USERNAME: cohost_user
+      SPRING_DATASOURCE_PASSWORD: cohost_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: false
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    networks:
+      - cohost-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./co_host_frontend
+      dockerfile: Dockerfile
+    container_name: cohost-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - cohost-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  cohost-network:
+    driver: bridge
